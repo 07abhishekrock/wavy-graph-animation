@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { bisector } from 'd3-array'
 import { newData, oldData, uncompressedNewData } from './data'
+import LinkedList from './LinkedList';
 
 const FRAME_COUNT = 15;
 
@@ -89,34 +90,29 @@ const findDiff = (dataPoints1, dataPoints2) => {
     }
   }
 
-  let newSmallArray = [...smallerArray]
+	const smallArrayLinkedList = new LinkedList(smallerArray);
 
   for (let j = 0; j < smallArrayInsertions.length; j++) {
     const finalIndexToInsertAt = smallArrayInsertions[j].indexToInsertAt + j
-    newSmallArray = [
-      ...newSmallArray.slice(0, finalIndexToInsertAt),
-      smallArrayInsertions[j].coords,
-      ...newSmallArray.slice(finalIndexToInsertAt)
-    ]
+		smallArrayLinkedList.insertElementAtIndex(finalIndexToInsertAt, smallArrayInsertions[j].coords); 
   }
 
-  let newlongArray = [...longerArray]
+	console.time('linked list performance');
+	const veryLongLinkedList = new LinkedList(longerArray);
+	veryLongLinkedList.insertElementAtIndex(10, [2, 3]);
+	console.log(veryLongLinkedList.getArrayBack());
+	console.timeEnd('linked list performance')
+
+	const longArrayLinkedList = new LinkedList(longerArray);
 
   for (let j = 0; j < longArrayInsertions.length; j++) {
     const finalIndexToInsertAt = longArrayInsertions[j].indexToInsertAt + j
-    newlongArray = [
-      ...newlongArray.slice(0, finalIndexToInsertAt),
-      longArrayInsertions[j].coords,
-      ...newlongArray.slice(finalIndexToInsertAt)
-    ]
+		longArrayLinkedList.insertElementAtIndex(finalIndexToInsertAt, longArrayInsertions[j].coords); 
   }
 
-  console.log(
-    longArrayInsertions.length,
-    smallArrayInsertions.length,
-    dataPoints1.length,
-    dataPoints2.length
-  )
+	const newlongArray = longArrayLinkedList.getArrayBack();
+	const newSmallArray = smallArrayLinkedList.getArrayBack();
+
 
   const fromIsMoreThanTo = dataPoints2.length > dataPoints1.length
   return {
